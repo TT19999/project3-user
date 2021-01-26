@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import Pusher from 'pusher-js'
 import axios from 'axios'
+import { Button, Form, Modal } from 'react-bootstrap';
 
 class Navbar extends React.Component {
   constructor(props){
@@ -10,6 +11,7 @@ class Navbar extends React.Component {
     this.state={
       notifications: [],
       unread : '',
+      showModal : false,
     }
   }
 
@@ -92,6 +94,40 @@ class Navbar extends React.Component {
     })
   }
 
+  onClickShowModal= (event) =>{
+    this.setState({
+      showModal : true,
+    })
+  }
+  onClickHideModal= (event) =>{
+    this.setState({
+      showModal : false,
+    })
+  }
+  
+  onInputChange = (event) =>{
+    this.setState({
+      [event.target.name] : event.target.value
+    })
+  }
+
+  onInputSubmit = (event) => {
+    axios({
+      method : "POST",
+      url: "/api/set/create",
+      headers : {
+        Authorization: "Bearer" + localStorage.getItem("userToken")
+      },
+      data : {
+        name : this.state.title,
+        intro : this.state.intro,
+        status : "public",
+      }
+    }).then(res=>{
+      console.log(res)
+    })
+  }
+
   render(){
     const notifications = this.state.notifications[0] ? this.state.notifications.map(res => {
       if(res.type == 'new_post'){
@@ -120,6 +156,18 @@ class Navbar extends React.Component {
               </div>
             </a> 
             </>
+      }
+      if(res.type == 'new_comment'){
+        return <>
+            <a className="content" onClick={()=>this.onClickLink('/sets/', res.set_id, res.id,)} >
+              <div className="notification-item">
+                <small style={{lineHeight: '20px', float : 'right', paddingRight: '10px'}}> 1 day ago</small>
+                <img src={res.avatar}/>
+                <h4 className="item-title">{res.user_name} <small>Vừa bình luận trong bài viết của bạn</small></h4>
+                <p className="item-info" style={{lineHeight:'40px'}}>{res.set}</p>
+              </div>
+            </a> 
+        </>
       }
   }) : 
         <>
@@ -150,7 +198,41 @@ class Navbar extends React.Component {
               <Link className="nav-link" to="/">Home</Link>
               </li>
               <li className="nav-item">
-              <Link className="nav-link" to="/post/create">Create</Link>
+                <a className="nav-link">Create
+                  <i className="fa fa-caret-down" />
+                </a>
+                <div className="nav-submenu">
+                  <button type="button" class="btn btn-primary" data-toggle="modal" onClick={this.onClickShowModal}>
+                    Create New Set
+                  </button>
+                  <Modal show={this.state.showModal} onHide={this.onClickHideModal}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Create New Set</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                    <Form>
+                      <Form.Group>
+                        <Form.Label>Title</Form.Label>
+                        <Form.Control type="text" placeholder="Enter Title"  name ="title" onChange={this.onInputChange} required/>
+                        <Form.Text className="text-muted">
+                           Like number, school,...
+                        </Form.Text>
+                      </Form.Group>
+
+                      <Form.Group>
+                        <Form.Label>Description</Form.Label>
+                        <Form.Control type="text" placeholder="Enter Description" name="intro" onChange={this.onInputChange} required/>
+                        <Form.Text className="text-muted">
+                          Like this sets is about number
+                        </Form.Text>
+                      </Form.Group>
+                      <Button type="submit" variant="primary" onClick={this.onInputSubmit}>
+                        Save Changes
+                      </Button>
+                    </Form>
+                    </Modal.Body>
+                  </Modal>
+                </div>
               </li>
               {/* <li className="nav-item">
                 <div className="icon dropdown" id="bell"> 

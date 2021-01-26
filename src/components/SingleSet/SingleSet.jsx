@@ -1,7 +1,7 @@
 import React from 'react'
 import Banner from '../Banner'
 import axios from 'axios'
-import { ListGroup } from 'react-bootstrap'
+import { Button, Form, ListGroup, Modal } from 'react-bootstrap'
 import {
     SoundOutlined,
     LeftOutlined,
@@ -29,6 +29,10 @@ class SingleSet extends React.Component {
             owner : [],
             comment : '',
             comments: [],
+            showModal : false,
+            showModalSet: false,
+            title :'',
+            intro : '',
         }
     }
 
@@ -48,7 +52,9 @@ class SingleSet extends React.Component {
                 sets : res.data.sets,
                 owner : res.data.owner,
                 comments : res.data.sets.comments,
-                is_follow: res.data.is_follower
+                is_follow: res.data.is_follower,
+                title : res.data.sets.name,
+                intro : res.data.sets.intro,
              })
              console.log(this.state.cards)
          })
@@ -68,16 +74,20 @@ class SingleSet extends React.Component {
             },
             
         }).then(res =>{
-            const EntrisWordData = res.data.word
-            this.setState({
-                wordData : EntrisWordData,
-                lexicalEntries: EntrisWordData.results[0].lexicalEntries,
-                showListModal: true,
-                currentWord: this.state.word,
-                phonetic: EntrisWordData.results[0].lexicalEntries[0].entries[0].pronunciations[0].phoneticSpelling,
-                audioSrc : EntrisWordData.results[0].lexicalEntries[0].entries[0].pronunciations[0].audioFile
-              })
+            if(!res.data.word.error){
+                const EntrisWordData = res.data.word
+                this.setState({
+                    wordData : EntrisWordData,
+                    lexicalEntries: EntrisWordData.results[0].lexicalEntries,
+                    showListModal: true,
+                    currentWord: this.state.word,
+                    phonetic: EntrisWordData.results[0].lexicalEntries[0].entries[0].pronunciations[0].phoneticSpelling,
+                    audioSrc : EntrisWordData.results[0].lexicalEntries[0].entries[0].pronunciations[0].audioFile
+                })
+            }
               console.log(this.state)
+        }).catch(err => {
+            console.log(err)
         })
         }
         else {
@@ -95,6 +105,17 @@ class SingleSet extends React.Component {
        
     }
 
+    onClickShowModal= (event) =>{
+        this.setState({
+          showModal : true,
+        })
+      }
+      onClickHideModal= (event) =>{
+        this.setState({
+          showModal : false,
+        })
+      }
+    
     onClickButtonCategory = (lexicalCategory) => {
         this.state.lexicalEntries.map(data => {
             if(data.lexicalCategory.id === lexicalCategory){
@@ -152,11 +173,29 @@ class SingleSet extends React.Component {
         })
       }
 
+      onInputChange = (event) =>{
+        this.setState({
+          [event.target.name] : event.target.value
+        })
+      }
+      
     onClickAudio=()=>{
         if(this.state.audioSrc){
           let audio = new Audio(this.state.audioSrc)
           audio.play()
         }
+      }
+
+      onClickEdit = (event) => {
+          console.log('asdfasd')
+          this.setState({
+              showModalSet : true,
+          })
+      }
+      onClickHide = (event) => {
+          this.setState({
+              showModalSet : false,
+          })
       }
 
     onClickCreateCard = (event) =>{
@@ -179,6 +218,9 @@ class SingleSet extends React.Component {
             },
         }).then(res => {
             console.log(res)
+            window.location.reload()
+        }).catch(err => {
+            console.log(err)
         })
     }
 
@@ -209,6 +251,27 @@ class SingleSet extends React.Component {
             })
           }
         
+    }
+
+    onInputSubmit = (event) => {
+        event.preventDefault()
+        axios({
+            method : "POST",
+            url : "/api/set/update",
+            headers : {
+                'Authorization' : 'Bearer ' + localStorage.getItem("userToken")
+            },
+            data : {
+                id : this.state.sets.id,
+                name : this.state.title,
+                intro : this.state.intro,
+                status : "public",
+            }
+        }).then(res => {
+            window.location.reload()
+        }).catch(err => {
+            console.log(err)
+        })
     }
 
     onDeleteComment = ( event,id) => {
@@ -346,11 +409,38 @@ class SingleSet extends React.Component {
                                      {this.state.is_follow == false ? 
                                                 <>
                                                     {this.state.owner.id == localStorage.getItem('userId') ? 
-                                                    <a href={'/post/'+this.state.sets.id+'/edit'}>
-                                                    <button type="button" className="btn btn-primary" >
-                                                    Edit
+                                                    <>
+                                                    <button type="button" className="btn btn-primary" onClick={this.onClickEdit}>
+                                                        Edit
                                                     </button> 
-                                                    </a> :
+                                                    <Modal show={this.state.showModalSet} onHide={this.onClickHide}>
+                                                            <Modal.Header closeButton>
+                                                            <Modal.Title>Edit Set</Modal.Title>
+                                                            </Modal.Header>
+                                                            <Modal.Body>
+                                                            <Form>
+                                                            <Form.Group>
+                                                                <Form.Label>Title</Form.Label>
+                                                                <Form.Control type="text" placeholder="Enter Title"  name ="title" value={this.state.title} onChange={this.onInputChange} required/>
+                                                                <Form.Text className="text-muted">
+                                                                Like number, school,...
+                                                                </Form.Text>
+                                                            </Form.Group>
+
+                                                            <Form.Group>
+                                                                <Form.Label>Description</Form.Label>
+                                                                <Form.Control type="text" placeholder="Enter Description" name="intro" value={this.state.intro} onChange={this.onInputChange} required/>
+                                                                <Form.Text className="text-muted">
+                                                                Like this sets is about number
+                                                                </Form.Text>
+                                                            </Form.Group>
+                                                            <Button type="submit" variant="primary" onClick={this.onInputSubmit}>
+                                                                Save Changes
+                                                            </Button>
+                                                            </Form>
+                                                            </Modal.Body>
+                                                        </Modal>
+                                                    </> :
                                                     <button type="button" className="btn btn-primary" onClick={this.onClickFollow}>
                                                     Follow
                                                     </button>
@@ -365,6 +455,58 @@ class SingleSet extends React.Component {
                                                 }
                                     </div>
                                 </div>
+                                <p></p>
+                                {this.state.owner.id == localStorage.getItem('userId') ? <>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" onClick={this.onClickShowModal}>
+                                    Create New Card
+                                </button>
+                                <Modal show={this.state.showModal} onHide={this.onClickHideModal}>
+                                    <Modal.Header closeButton>
+                                    <Modal.Title>Create New Card</Modal.Title>
+                                    </Modal.Header>
+                                    <Modal.Body>
+                                    <form>
+                                        <div className="row">
+                                            <div class="col">
+                                            <label for="card_word">Word</label>
+                                            <input type="text" id="card_word" class="form-control" placeholder="Input your Word" value={this.state.word} name='word' onChange={this.onChangeWord} />
+                                            </div>
+                                            <div class="col">
+                                                <label for="card_phonetic">Phonetic</label>
+                                            <input type="text" id="card_phonetic" class="form-control" placeholder="Input your Word" value={this.state.phonetic} name='phonetic' readOnly/>
+                                                {this.state.audioSrc ? <SoundOutlined onClick={this.onClickAudio} style={{float : 'right'}}/> : null }
+                                            </div>
+                                        </div>
+
+                                        {this.state.lexicalEntries !== [] ? listlexicalEntries : null}
+                                        {this.state.meaning ? 
+                                        <>
+                                            <div class="form-group">
+                                                <label for="meaning_card">
+                                                    Meaning
+                                                </label>
+                                                <textarea className="form-control" id="meaning_card" value={this.state.meaning} name="meaning" onChange={this.onHandleChange} placeholder='Input your description' rows="2"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="example_card">Example</label>
+                                                <textarea className="form-control" id="example_card" value={this.state.example} name="example" onChange={this.onHandleChange} placeholder='Input your description' rows="2"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="exampleFormControlFile1">Example file input</label>
+                                            <input type="file" class="form-control-file" id="exampleFormControlFile1" name="avatar" onChange={this.onAvatarChange}/>
+                                            </div>
+                                            <button type="button" class="btn btn-primary" style={{marginLeft : '10px'}} onClick={this.onClickCreateCard}>Create</button>
+                                        </>
+                                        :
+                                        null
+                                        }
+                                    </form>
+                                    </Modal.Body>
+                                </Modal>
+                                </>
+                                :
+                                <>
+                                </>}
                             </div>
                             </div>
                         </div>
@@ -375,48 +517,7 @@ class SingleSet extends React.Component {
                             <hr>
                             </hr>
                         </div>
-                        <div style={{width: '100%',backgroundColor: 'white'}}>
-                        <div>
-                            <h4>Create New Card</h4>
-                        </div>
-                            <form>
-                            <div className="row">
-                                <div class="col">
-                                <label for="card_word">Word</label>
-                                <input type="text" id="card_word" class="form-control" placeholder="Input your Word" value={this.state.word} name='word' onChange={this.onChangeWord} />
-                                </div>
-                                <div class="col">
-                                    <label for="card_phonetic">Phonetic</label>
-                                <input type="text" id="card_phonetic" class="form-control" placeholder="Input your Word" value={this.state.phonetic} name='phonetic' readOnly/>
-                                    {this.state.audioSrc ? <SoundOutlined onClick={this.onClickAudio} style={{float : 'right'}}/> : null }
-                                </div>
-                            </div>
-
-                            {this.state.lexicalEntries !== [] ? listlexicalEntries : null}
-                            {this.state.meaning ? 
-                            <>
-                                <div class="form-group">
-                                    <label for="meaning_card">
-                                        Meaning
-                                    </label>
-                                    <textarea className="form-control" id="meaning_card" value={this.state.meaning} name="meaning" onChange={this.onHandleChange} placeholder='Input your description' rows="1"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="example_card">Example</label>
-                                    <textarea className="form-control" id="example_card" value={this.state.example} name="example" onChange={this.onHandleChange} placeholder='Input your description' rows="1"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="exampleFormControlFile1">Example file input</label>
-                                <input type="file" class="form-control-file" id="exampleFormControlFile1" name="avatar" onChange={this.onAvatarChange}/>
-                                </div>
-                                <button type="button" class="btn btn-primary" style={{marginLeft : '10px'}} onClick={this.onClickCreateCard}>Create</button>
-                            </>
-                            :
-                            null
-                            }
-                            </form>
-                            <hr></hr>
-                        </div>
+                        
                     </div>
                     
                     <div class="col-md-3">

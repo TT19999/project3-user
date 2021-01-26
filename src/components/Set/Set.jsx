@@ -11,13 +11,15 @@ class Set extends React.Component {
       event.preventDefault()
       axios({
         method: "DELETE",
-        url: "/api/sets/" + this.props.sets.id,
+        url: "/api/set/delete",
         headers : {
             Authorization: "Bearer" + localStorage.getItem("userToken")
         },
+        data : {
+          id : this.props.sets.id
+        }
       }).then(res => {
-        console.log(res)
-        window.location.replace('/')
+        window.location.reload()
     })
     }
 

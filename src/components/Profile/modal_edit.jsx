@@ -101,10 +101,6 @@ class ModalEdit extends React.Component {
       handleSubmit = (event) => {
         event.preventDefault()
         var skills = []
-        
-        this.state.skills.forEach(function (item, index, array) {
-            skills.push(String(item.id))
-        })
         const data = {
             first_name : this.state.first_name,
             last_name : this.state.last_name,
@@ -182,7 +178,7 @@ class ModalEdit extends React.Component {
                                 <small className="text-danger">{this.state.errors['phone']}</small>
                             }
                             </div>
-                            <div className="form-group">
+                            {/* <div className="form-group">
                             <label for="InputPassword">Facebook</label>
                             <input type="text" className="form-control" name="facebook" value={this.state.facebook} placeholder="facebook" onChange={this.handleInputChange}/>
                             {
@@ -213,30 +209,7 @@ class ModalEdit extends React.Component {
                                 this.state.errors['website'] &&
                                 <small className="text-danger">{this.state.errors['website']}</small>
                             }
-                            </div>
-                            <div class="form-group">
-                            <label for="InputPassword">Subject</label>
-                            <select class="form-control" name="subject" id="exampleFormControlSelect1" value={this.state.subject} onChange={this.handleInputChange}>
-                                <option value="student">student</option>
-                                <option value="develop">develop</option>
-                                <option value="tester">tester</option>
-                                <option value="devOps">devOps</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            </div>
-                            <div className="form-group">
-                                <label for="InputPassword">Skills</label>
-                                <Select
-                                    isMulti
-                                    name="skill"
-                                    options={this.options}
-                                    onChange={this.onSelectedOptionsChange}
-                                    className="basic-multi-select"
-                                    classNamePrefix="Skills"
-                                    placeholder="Skills..."
-                                />
-                            </div>
-                        
+                            </div> */}
                             <div class="form-group">
                             <label for="InputPassword">Status</label>
                             <select class="form-control" name="status" id="exampleFormControlSelect1" value={this.state.status} onChange={this.handleInputChange}>

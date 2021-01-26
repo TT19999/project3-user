@@ -42,8 +42,8 @@ class  Welcome extends React.Component{
     <div>
       <Banner 
       backgroundImage="url(assets/img/bg-gift.jpg)"
-      title="Latest Blog Posts"
-      subtitle="Read and get updated on the latest posts"
+      title="Latest Sets"
+      subtitle="Read and get updated on the latest Sets"
       />
     <main className="main-content bg-gray">      
           <section class="blog-cards-wrapper">

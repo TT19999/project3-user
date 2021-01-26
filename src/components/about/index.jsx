@@ -14,7 +14,7 @@ class About extends React.Component {
                 <div className="row">
                     <div className="col-12 col-lg-6 offset-lg-3">
                         <div>
-                            <h1>This is a project in CodeStar Academy</h1>
+                            <h1>This is a project in Project 3 </h1>
                         </div>
                     </div>
                 </div>

@@ -23,6 +23,7 @@ import MyComponent from './components/Welcome/test';
 import SingleSet from './components/SingleSet/SingleSet';
 import CreateSet from './components/CreateSet/CreateSet';
 import './components/Card/SingleCard.css';
+import Search from './components/Search/Search';
 // import EditPost from './components/Edit/EditPost';
 
 
@@ -69,7 +70,9 @@ return (
       <Route exact path="/sets/create" component={CreateSet} />
       <Route exact path ="/sets/:id" component={SingleSet} />
       <Route exact path="/user/profile/:id" component={Form} />
-      <Route exact path="/test" component={MyComponent} /> 
+      <Route exact path="/test" component={MyComponent} />
+      <Route exact path ="/search" component={Search} />
+      <Route exact path="/about" component={About} />
       {/* <Route exact path="/post/:id/edit" component={EditPost} /> */}
       
       <Route exact path="/login" >
